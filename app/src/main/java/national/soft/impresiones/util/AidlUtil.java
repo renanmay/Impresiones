@@ -84,6 +84,9 @@ public class AidlUtil {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             woyouService = IWoyouService.Stub.asInterface(service);
+            if(context!=null){
+                Toast.makeText(context,"Se inciio el servicio de impresora",Toast.LENGTH_LONG).show();
+            }
         }
     };
 
@@ -173,15 +176,11 @@ public class AidlUtil {
      */
     public void initPrinter() {
         if (woyouService == null) {
-            GeneraLogs.commitToFile("initPRinter","woyouService is null");
             Toast.makeText(context,R.string.toast_2, Toast.LENGTH_LONG).show();
             return;
         }
 
         try {
-            GeneraLogs.commitToFile("initPRinter","woyouService no es nullo y manda llamar printer init");
-            GeneraLogs.commitToFile("initPRinter",woyouService.getPrinterModal());
-            GeneraLogs.commitToFile("initPRinter",woyouService.getServiceVersion());
             woyouService.printerInit(null);
         } catch (RemoteException e) {
             e.printStackTrace();

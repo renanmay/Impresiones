@@ -10,21 +10,28 @@ import com.singhajit.sherlock.core.Sherlock;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
+import android.util.Base64;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 import national.soft.impresiones.util.AidlUtil;
 import national.soft.impresiones.util.BaseApp;
 import national.soft.impresiones.util.GeneraLogs;
 import national.soft.impresiones.util.Permisos;
+import national.soft.impresiones.util.PrinterCallback;
 
 public class MainActivity extends AppCompatActivity implements ILog {
         public static String cadena = "";
         public static String salto="\n";
         public TextView textView;
-
+        public String ticketdemo="DQobIQggICAgICAgIERFTU8NChtADSAgICAgICAgREVNTw0KICAgUkZDOkEwMDAwMDAwMA0KQVZFTklEQSBDQU1BUkEgREUgQ09NRVJDSU8gTUVSSUQNCkEgWVVDQVRBTiBNRVhJQ08gIENQICA5NzEzMw0KU1VDVVJTQUw6REVNTyA5LjUgTUVSSURBIFlVQ0FUQU4NCj09PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09DQpNRVNBOjI1ICAgICAgICBNRVNFUk86TEFVUkEgRURJVEggRElBWiBBUk1BRElMTE8NCg0KGyEIICAgICBGT0xJTzoxNzg2DQobQA0xNC8wMi8yMDIwIDA1OjIxOjI1IFBNDQpQRVJTT05BUzo0ICAgICAgICAgICAgICAgT1JERU46MTAwDQo9PT09PT09PT09PT09PT09PT09PT09PT09PT09PT09PQ0KDQpDQU5UIERFU0NSSVBDSU9OICAgICAgICAgSU1QT1JURQ0KMSAgICBNQVJBVE9OIFlPRyAgICAgICAkNTkuMDANCjEgICAgRU5TQUxBREEgRlJVICAgICAgJDY5LjAwDQoxICAgIE9SREVOIEZSVVRBUyAgICAgICQ1Mi4wMA0KICAgICBTQU5ESUEgICAgICAgICAgICAkMC4wMA0KDQpTVUJUT1RBTDogICAgICAkMTU1LjE3DQpJVkE6ICAgICAgICAgICAgJDI0LjgzDQobIRBUT1RBTDogICAgICAgICAkMTgwLjAwDQoNChtADVNPTjpDSUVOVE8gT0NIRU5UQSBQRVNPUyAwMC8xMDANCk0uTi4NChshCEdSQUNJQVMgUE9SIFNVIFBSRUZFUkVOQ0lBDQobQA0NCioqKlNPRlQgUkVTVEFVUkFOVCBWOS41IFBSTyoqKg0KDQoNCg==";
+        public AidlUtil aidl;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,17 +44,18 @@ public class MainActivity extends AppCompatActivity implements ILog {
         FloatingActionButton print = findViewById(R.id.print);
       //  Sherlock.init(MainActivity.this);
         Permisos.solicitarPermisos(MainActivity.this,Permisos.permisos());
+        aidl = AidlUtil.getInstance();
+        
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-               AidlUtil.getInstance().connectPrinterService(MainActivity.this);
-                if (AidlUtil.getInstance().isConnect()){
-                    escribirlog("conectado al servicio de impresion");
-                    GeneraLogs.commitToFile("Logs","contectado al servicio");
-                }else{
-                    escribirlog("sin conexion, la instancia no se inicializo.");
-
+                try {
+                    AidlUtil.getInstance().connectPrinterService(MainActivity.this);
+                }catch (Exception e){
+                    GeneraLogs.commitToFile("Error",e.getMessage());
+                    e.printStackTrace();
                 }
+
             }
         });
 
@@ -67,9 +75,28 @@ public class MainActivity extends AppCompatActivity implements ILog {
             @Override
             public void onClick(View view) {
 
-                    GeneraLogs.commitToFile("Conectado","servicio activo");
+                byte[]data= Base64.decode(ticketdemo,Base64.DEFAULT);
+                String dato = new String(data, StandardCharsets.UTF_8);
+                String tiket = dato.replace("@","").replace("!","");
                     AidlUtil.getInstance().initPrinter();
-                    AidlUtil.getInstance().printText("Prueba de impresión",20f,false,false);
+                    AidlUtil.getInstance().printText(tiket,20f,false,false);
+                    AidlUtil.getInstance().print3Line();
+                //final String finalResult = result;
+                List<String>info = AidlUtil.getInstance().getPrinterInfo(new PrinterCallback() {
+                    
+                    @Override
+                    public String getResult() {
+                        return null;
+                    }
+
+                    @Override
+                    public void onReturnString(String result) {
+
+                    }
+                });
+                if (info!=null){
+                 //   Toast.makeText(getApplicationContext(),result,Toast.LENGTH_LONG).show();
+                }
             }
         });
 //        AidlUtil.getInstance().connectPrinterService(MainActivity.this);

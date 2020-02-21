@@ -11,7 +11,8 @@ public interface IWoyouService extends android.os.IInterface
 /** Local-side IPC implementation stub class. */
 public static abstract class Stub extends android.os.Binder implements IWoyouService
 {
-private static final java.lang.String DESCRIPTOR = "national.soft.impresiones.com.sunmi.IWoyouService";
+//private static final java.lang.String DESCRIPTOR = "national.soft.impresiones.com.sunmi.IWoyouService";
+private static final java.lang.String DESCRIPTOR = "woyou.aidlservice.jiuiv5.IWoyouService";
 /** Construct the stub at attach it to the interface. */
 public Stub()
 {
